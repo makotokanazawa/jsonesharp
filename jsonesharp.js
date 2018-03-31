@@ -203,6 +203,7 @@ var eval_button_ready = function() {
     $('#interrupt').off('click');
     $('#evaluate').prop('disabled', false);
     $('#eval_slow').prop('disabled', false);
+    $('#eval_step').prop('disabled', false);
 };
 
 var eval_button_busy = function() {
@@ -210,6 +211,7 @@ var eval_button_busy = function() {
     $('#interrupt').prop('disabled', false);
     $('#evaluate').prop('disabled', true);
     $('#eval_slow').prop('disabled', true);
+    $('#eval_step').prop('disabled', true);
 };
 
 var evaluate = function() {
@@ -228,7 +230,7 @@ var evaluate = function() {
 
     // Move dom registers to array
     var regs = [[]];
-    regs = dom_regs_to_array(regs);
+    regs = dom_regs_to_array();
 
     // Start worker and make kill button active
     var thread = new Worker('evaluate.js');
@@ -252,17 +254,11 @@ var eval_slow = function() {
     eval_message();
     
     // Parse program
-    var parsed = parse_program();
-    if (parsed[0]) {
-    	var p = parsed[1];
-    }
-    else {
-	   return;
-    }
+    var p = vernacular_compile($('#program').val());
 
     // Move dom registers to array
     var regs = [[]];
-    regs = dom_regs_to_array(regs);
+    regs = dom_regs_to_array();
 
     // Start worker and make kill button active
     var thread = new Worker('eval-slow.js');
@@ -280,8 +276,42 @@ var eval_slow = function() {
     	}
     	array_to_dom_regs(e.data[1]);
     };
-    thread.postMessage([p, regs, 20]);
+    thread.postMessage([p, regs, 400]);
 };
+
+var pos = 0;
+var halted = 0;
+
+var eval_step = function() {
+
+    eval_button_busy();
+    eval_message();
+    
+    // Move dom registers to array
+    var regs = dom_regs_to_array();
+
+    // Parse program
+    var p = vernacular_compile($('#program').val());
+
+    var new_pos = step(p, pos, regs);
+    if (new_pos == pos) {
+	halting_message(pos, p);
+	halted = 1;
+    } else {
+	pos = new_pos;
+    };
+    array_to_dom_regs(regs);
+    if (!halted) {
+	eval_button_ready();
+    };
+};
+
+var reset_program = function() {
+    pos = 0;
+    halted = 0;
+    eval_button_ready();
+    status_text('a 1# interpreter for web browsers');
+}
 
 var load_program = function() {
     var text = $(this).siblings("p.program-text").text().trim();
@@ -432,6 +462,8 @@ $(document).ready(function() {
     $('#clear_program').click(clear_program);
     $('#evaluate').click(evaluate);
     $('#eval_slow').click(eval_slow);
+    $('#eval_step').click(eval_step);
+    $('#reset_program').click(reset_program);
     $('a.wk-pload').click(load_program);
     $('#save_as_new').click(function () {
         $('#save-modal').modal('show');
@@ -475,6 +507,9 @@ $(document).ready(function() {
                 }
                 if (e.which == 119) { // 'w'
                     $("#workshop-tab").click();
+                }
+                if (e.which == 116) { // 't'
+                    $("#eval_step").click();
                 }
             }
 
