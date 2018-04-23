@@ -25,6 +25,18 @@ var halting_message = function(n, p) {
 
 };
 
+var halting_message_steps = function(n, p, m) {
+
+    //TODO: Look into more informative halting messages
+    if (n == p.length) {
+	   status_text('halted properly after '.concat(String(m),' steps');
+    }
+    else {
+	   status_text('halted improperly after '.concat(String(m),' steps');
+    }
+
+};
+
 var eval_message = function() {
 
     status_text('evaluating program');
@@ -287,6 +299,7 @@ var eval_slow = function() {
 
 var pos = 0;
 var halted = 0;
+var n_steps = 0;
 
 var eval_step = function() {
 
@@ -301,10 +314,12 @@ var eval_step = function() {
 
     var new_pos = step(p, pos, regs);
     if (new_pos == pos) {
-	halting_message(pos, p);
+	halting_message_steps(pos, p, n_steps);
 	halted = 1;
     } else {
 	pos = new_pos;
+	n_steps++;
+	status_test('evaluating program -- executed '.concat(String(n_steps),' steps'));
     };
     array_to_dom_regs(regs);
     if (!halted) {
@@ -315,6 +330,7 @@ var eval_step = function() {
 var reset_program = function() {
     pos = 0;
     halted = 0;
+    n_steps = 0;
     eval_button_ready();
     status_text('a 1# interpreter for web browsers');
 }
