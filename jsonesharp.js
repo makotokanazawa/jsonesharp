@@ -10,11 +10,17 @@ var status_text = function(text) {
 var halting_message = function(n, p) {
 
     //TODO: Look into more informative halting messages
-    if (n==0 && p.length > 0) {
-	   status_text('halted improperly');
+//    if (n==0 && p.length > 0) {
+//	   status_text('halted improperly');
+//    }
+//    else {
+//	   status_text('halted properly');
+//    }
+    if (n == p.length) {
+	   status_text('halted properly');
     }
     else {
-	   status_text('halted properly');
+	   status_text('halted improperly');
     }
 
 };
