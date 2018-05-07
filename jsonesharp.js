@@ -238,7 +238,14 @@ var evaluate = function() {
     eval_message();
     
     // Parse program
-    var p = vernacular_compile($('#program').val());
+//    var p = vernacular_compile($('#program').val());
+    var parsed = parse_program();
+    if (parsed[0]) {
+    	var p = parsed[1];
+    }
+    else {
+	   return;
+    }
     // if (parsed[0]) {
     // 	var p = parsed[1];
     // }
@@ -272,7 +279,14 @@ var eval_slow = function() {
     eval_message();
     
     // Parse program
-    var p = vernacular_compile($('#program').val());
+//    var p = vernacular_compile($('#program').val());
+    var parsed = parse_program();
+    if (parsed[0]) {
+    	var p = parsed[1];
+    }
+    else {
+	   return;
+    }
 
     // Move dom registers to array
     var regs = [[]];
@@ -311,7 +325,14 @@ var eval_step = function() {
     var regs = dom_regs_to_array();
 
     // Parse program
-    var p = vernacular_compile($('#program').val());
+//    var p = vernacular_compile($('#program').val());
+    var parsed = parse_program();
+    if (parsed[0]) {
+    	var p = parsed[1];
+    }
+    else {
+	   return;
+    }
 
     if (pos != p.length) n_steps++; // acceptance is not counted as an additional step
     var new_pos = step(p, pos, regs);
