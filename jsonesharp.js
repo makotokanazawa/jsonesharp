@@ -308,7 +308,7 @@ var eval_slow = function() {
     	}
     	array_to_dom_regs(e.data[1]);
     };
-    thread.postMessage([p, regs, 20]);
+    thread.postMessage([p, regs, 5]);
 };
 
 var pos = 0;
