@@ -6,20 +6,34 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- Latest compiled and minified CSS -->
+	<!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">-->
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+	<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">-->
+	<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>-->
+
+	<!-- Optional theme -->
+	<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">-->
+
     <link rel="stylesheet" href="jsonesharp.css">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>-->
+	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	
     <script src="jquery.cookie.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="library.js"></script>
+	<!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+	<!--<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>-->
+
+	<script src="library.js"></script>
     <script src="preprocessing.js"></script>
     <script src="jsonesharp.js"></script>
     <script src="interpreter.js"></script>
 
-    
   </head>
   
 <body>
@@ -30,7 +44,7 @@
 	<div class="page-header">
 		<h4>js1#:
 		<small>
-		<span id="status">a 1# interpreter for web browsers</span>
+		<span id="status">a 1# interpreter for web browsers (type '?' for help)</span>
 		</small>
 		</h4>
 	</div>
@@ -60,27 +74,27 @@
 				  <div class="col-sm-2 row-sm-offset-1">
 				    <div class="btn-group-vertical" role="group" aria-label="...">
 		    		  
-				      <button type="button" class="btn btn-default rr-smalltext" 
-				      data-toggle="tooltip" title="c" id="clear_program">
+				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="c" id="clear_program">
 						clear
 				      </button>
 				      <button type="button" class="btn btn-default rr-smalltext" id="add_register"></button>
 				      <button type="button" class="btn btn-default rr-smalltext" id="remove_register"></button>
-				      <button type="button" class="btn btn-default rr-smalltext" 
-				      data-toggle="tooltip" title="r" id="evaluate">
+				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="v" id="evaluate">
 						evaluate
 				      </button>
-				      <button type="button" class="btn btn-default rr-smalltext" id="eval_slow">
-						eval slow
-				      </button>
+				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="r" id="eval_slow">
+						run <!-- eval slow-->
+					  </button>
+					  <input type="range" class="form-control-range" id="speed" name="speed" min="1" max="2000" step="1" value="1000">
+					  <label for="speed" style="font-size: smaller; font-weight: lighter">fast&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;slow</label>
 				      <button type="button" class="btn btn-default rr-smalltext" id="interrupt">
 						interrupt
 				      </button>
 				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="t" id="eval_step">
 						step
 				      </button>
-				      <button type="button" class="btn btn-default rr-smalltext" id="reset_program">
-						reset program
+				      <button type="button" class="btn btn-default rr-smalltext" id="reset_machine">
+						reset machine
 				      </button>
 				      <button type="button" class="btn btn-default rr-smalltext" id="open" data-toggle="tooltip" title="o">
 				      	open
@@ -90,6 +104,13 @@
 				      </button> 
 				    </div>
 				  </div>
+				</div>
+				<div>
+					<h4>
+						<small>
+							<span id="message">ready</span>
+						</small>
+					</h4>
 				</div>
 
 			<!-- Registers to appear here -->
@@ -134,8 +155,10 @@
 			      		<kbd>Esc</kbd>: deselect text area, exit help dialog
 
 			  			<h4>Editor <kbd>e</kbd> </h4>
-			  			<kbd>c</kbd>: clear program register <br>
-			  			<kbd>r</kbd>: run program <br>
+						<kbd>c</kbd>: clear program register <br>
+						<kbd>v</kbd>: evaluate program <br>
+			  			<kbd>r</kbd>: run program at varying speed<br>
+						<kbd>t</kbd>: run one step at a time <br>
 
 			  			<h4>Workshop <kbd>w</kbd> </h4>
 			  			<kbd>l</kbd>: load displayed program into register <br>
