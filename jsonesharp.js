@@ -54,7 +54,7 @@ var running_message = function(n, p, m) {
 
 var eval_message = function() {
 
-    status_text('running');
+    status_text('running...');
 };
 
 var interrupt_message = function() {
@@ -251,7 +251,7 @@ var evaluate = function() {
 
     if (halted) return;
     
-    message_text('ready');
+    message_text('running...');
     eval_button_busy();
     eval_message();
     
@@ -283,6 +283,7 @@ var evaluate = function() {
     	eval_button_ready();
     };
     thread.postMessage([p, regs]);
+    message_text("ready");
 };
 
 var eval_slow = function() {
