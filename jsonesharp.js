@@ -7,6 +7,11 @@ var status_text = function(text) {
     $('#status').text(text);
 };
 
+var message_text = function(text) {
+
+    $('#message').text(text);
+};
+
 var halting_message = function(n, p) {
 
     //TODO: Look into more informative halting messages
@@ -18,9 +23,11 @@ var halting_message = function(n, p) {
 //    }
     if (n == p.length) {
 	   status_text('halted properly');
+//        message_text('halted properly');
     }
     else {
 	   status_text('halted improperly');
+//        message_text('halted improperly');
     }
 
 };
@@ -29,22 +36,30 @@ var halting_message_steps = function(n, p, m) {
 
     //TODO: Look into more informative halting messages
     if (n == p.length) {
-	status_text('halted properly after '.concat(String(m),' steps'));
+//	status_text('halted properly after '.concat(String(m),' steps'));
+        message_text('halted properly after '.concat(String(m),' steps'));
     }
     else {
-	status_text('halted improperly after '.concat(String(m),' steps'));
+//	status_text('halted improperly after '.concat(String(m),' steps'));
+        message_text('halted improperly after '.concat(String(m),' steps'));
     }
 
 };
 
+var running_message = function(n, p, m) {
+
+//    status_text('executed '.concat(String(m),' steps; next instruction is ', String(n), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
+    message_text('executed '.concat(String(m),' steps; next instruction is ', String(n), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
+}
+
 var eval_message = function() {
 
-    status_text('evaluating program');
+    status_text('running');
 };
 
 var interrupt_message = function() {
 
-    status_text('evaluation interrupted');
+    status_text('execution interrupted');
 };
 
 //
@@ -221,7 +236,7 @@ var eval_button_ready = function() {
     $('#interrupt').off('click');
     $('#evaluate').prop('disabled', false);
     $('#eval_slow').prop('disabled', false);
-    $('#eval_step').prop('disabled', false);
+//    $('#eval_step').prop('disabled', false);
 };
 
 var eval_button_busy = function() {
@@ -234,6 +249,8 @@ var eval_button_busy = function() {
 
 var evaluate = function() {
 
+    if (halted) return;
+    
     eval_button_busy();
     eval_message();
     
@@ -246,12 +263,6 @@ var evaluate = function() {
     else {
 	   return;
     }
-    // if (parsed[0]) {
-    // 	var p = parsed[1];
-    // }
-    // else {
-	   // return;
-    // }
 
     // Move dom registers to array
     var regs = [[]];
@@ -262,7 +273,7 @@ var evaluate = function() {
     $('#interrupt').click(function() {
     	thread.terminate();
     	interrupt_message();
-    	eval_button_ready();
+//    	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
@@ -274,6 +285,8 @@ var evaluate = function() {
 };
 
 var eval_slow = function() {
+
+    if (halted) return;
     
     eval_button_busy();
     eval_message();
@@ -292,31 +305,36 @@ var eval_slow = function() {
     var regs = [[]];
     regs = dom_regs_to_array();
 
+    var interval = document.getElementById("speed").value;
+
     // Start worker and make kill button active
     var thread = new Worker('eval-slow.js');
     $('#interrupt').click(function() {
 
     	thread.terminate();
     	interrupt_message();
-    	eval_button_ready();
+//    	eval_button_ready();
     });
     thread.onmessage = function(e) {
 
     	if (e.data[2]) {
-    	    halting_message(e.data[0], p);
+            halting_message_steps(e.data[0], p, e.data[3]);
+            halting_message(e.data[0], p);
     	    eval_button_ready();
     	}
-    	array_to_dom_regs(e.data[1]);
+        array_to_dom_regs(e.data[1]);
+        running_message(e.data[0], p, e.data[3]);
     };
-    thread.postMessage([p, regs, 400]);
+    thread.postMessage([p, regs, interval]);
 };
 
 var pos = 0;
-var halted = 0;
+var halted = false;
 var n_steps = 0;
 
 var eval_step = function() {
 
+    if (halted) return;
     eval_button_busy();
     $('#interrupt').prop('disabled', true);
     eval_message();
@@ -334,27 +352,33 @@ var eval_step = function() {
 	   return;
     }
 
-    if (pos != p.length) n_steps++; // acceptance is not counted as an additional step
+    if (pos < 0 || p.length <= pos) return;
     var new_pos = step(p, pos, regs);
-    if (new_pos == pos) {
-	halting_message_steps(pos, p, n_steps);
-	halted = 1;
+    n_steps++;
+    if (new_pos < 0 || p.length <= new_pos) {
+        halting_message_steps(new_pos, p, n_steps);
+        halting_message(new_pos, p);
+	    halted = true;
     } else {
-	pos = new_pos;
-	status_text('evaluating program -- executed '.concat(String(n_steps),' steps'));
+//	    status_text('executed '.concat(String(n_steps),' steps'));
+        running_message(new_pos, p, n_steps);
     };
+    pos = new_pos;
     array_to_dom_regs(regs);
     if (!halted) {
-	eval_button_ready();
+//      eval_button_ready();
+        $('#eval_step').prop('disabled', false);
     };
 };
 
-var reset_program = function() {
+var reset_machine = function() {
     pos = 0;
-    halted = 0;
+    halted = false;
     n_steps = 0;
     eval_button_ready();
-    status_text('a 1# interpreter for web browsers');
+    $('#eval_step').prop('disabled', false);
+    status_text("a 1# interpreter for web browsers (type '?' for help)");
+    message_text("ready");
 }
 
 var load_program = function() {
@@ -366,7 +390,7 @@ var load_program = function() {
 var add_workshop_page = function(title, program_text, active, tabpanel_id) {
     // find the workshop's stacked nav
     var ul = $("#" + tabpanel_id + " ul.nav-tabs");
-    var num_page = ul.children().size() + 1;
+    var num_page = ul.children().length + 1;
 
     // find a title
     if (title == null) title = "program " + num_page.toString();
@@ -507,7 +531,7 @@ $(document).ready(function() {
     $('#evaluate').click(evaluate);
     $('#eval_slow').click(eval_slow);
     $('#eval_step').click(eval_step);
-    $('#reset_program').click(reset_program);
+    $('#reset_machine').click(reset_machine);
     $('a.wk-pload').click(load_program);
     $('#save_as_new').click(function () {
         $('#save-modal').modal('show');
@@ -537,23 +561,26 @@ $(document).ready(function() {
 
             // these shortcuts are available for editor tab only
             if ($("li[class=active] > #editor-tab").length) {
+                if (e.which == 99) { // 'c'
+                    $('#clear_program').click();
+                }
+                if (e.which == 111) { // 'o'
+                    $('#open-modal').modal('show');
+                }
                 if (e.which == 114) { // 'r'
-                    $('#evaluate').click();
+                    $('#eval_slow').click();
                 }
                 if (e.which == 115) { // 's'
                     $('#save-modal').modal('show');
                 }
-                if (e.which == 111) {
-                    $('#open-modal').modal('show');
-                }
-                if (e.which == 99) { // 'c'
-                    $('#clear_program').click();
+                if (e.which == 116) { // 't'
+                    $("#eval_step").click();
+                }   
+                if (e.which == 118) { // 'v'
+                    $('#evaluate').click();
                 }
                 if (e.which == 119) { // 'w'
                     $("#workshop-tab").click();
-                }
-                if (e.which == 116) { // 't'
-                    $("#eval_step").click();
                 }
             }
 
