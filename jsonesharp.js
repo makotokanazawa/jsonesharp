@@ -49,7 +49,7 @@ var halting_message_steps = function(n, p, m) {
 var running_message = function(n, p, m) {
 
 //    status_text('executed '.concat(String(m),' steps; next instruction is ', String(n), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
-    message_text('executed '.concat(String(m),' steps; next instruction is ', String(n), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
+    message_text('executed '.concat(String(m),' steps; next instruction is ', String(n+1), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
 }
 
 var eval_message = function() {
