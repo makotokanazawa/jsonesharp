@@ -251,6 +251,7 @@ var evaluate = function() {
 
     if (halted) return;
     
+    message_text('ready');
     eval_button_busy();
     eval_message();
     
