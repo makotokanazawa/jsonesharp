@@ -273,7 +273,8 @@ var evaluate = function() {
     var thread = new Worker('evaluate.js');
     $('#interrupt').click(function() {
     	thread.terminate();
-    	interrupt_message();
+        interrupt_message();
+        halted = true;
 //    	eval_button_ready();
     });
     thread.onmessage = function(e) {
@@ -314,7 +315,8 @@ var eval_slow = function() {
     $('#interrupt').click(function() {
 
     	thread.terminate();
-    	interrupt_message();
+        interrupt_message();
+        halted = true;
 //    	eval_button_ready();
     });
     thread.onmessage = function(e) {
