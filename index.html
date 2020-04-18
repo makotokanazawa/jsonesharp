@@ -79,16 +79,19 @@
 				      </button>
 				      <button type="button" class="btn btn-default rr-smalltext" id="add_register"></button>
 				      <button type="button" class="btn btn-default rr-smalltext" id="remove_register"></button>
-				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="v" id="evaluate">
+					  <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="v" id="evaluate">
 						evaluate
-				      </button>
-				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="r" id="eval_slow">
-						run <!-- eval slow-->
 					  </button>
-					  <input type="range" class="form-control-range" id="speed" name="speed" min="1" max="2000" step="1" value="1000">
-					  <label for="speed" style="font-size: smaller; font-weight: lighter">fast&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;slow</label>
 				      <button type="button" class="btn btn-default rr-smalltext" id="interrupt">
 						interrupt
+				      </button>
+					  <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="r" id="eval_slow">
+						run <!-- eval slow-->
+					  </button>
+					  <input type="range" class="form-control-range" id="speed" name="speed" min="4" max="2000" step="1" value="1000">
+					  <label for="speed" style="font-size: smaller; font-weight: lighter">fast&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;slow</label>
+				      <button type="button" class="btn btn-default rr-smalltext" id="pause">
+						pause
 				      </button>
 				      <button type="button" class="btn btn-default rr-smalltext" data-toggle="tooltip" title="t" id="eval_step">
 						step
@@ -156,8 +159,8 @@
 
 			  			<h4>Editor <kbd>e</kbd> </h4>
 						<kbd>c</kbd>: clear program register <br>
-						<kbd>v</kbd>: evaluate program <br>
-			  			<kbd>r</kbd>: run program at varying speed<br>
+						<kbd>v</kbd>: evaluate program instantly <br>
+			  			<kbd>r</kbd>: run program at varying speed <br>
 						<kbd>t</kbd>: run one step at a time <br>
 
 			  			<h4>Workshop <kbd>w</kbd> </h4>
