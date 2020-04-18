@@ -22,12 +22,12 @@ var halting_message = function(n, p) {
 //	   status_text('halted properly');
 //    }
     if (n == p.length) {
-	   status_text('halted properly');
-//        message_text('halted properly');
+	   status_text("halted properly");
+       message_text("halted");
     }
     else {
-	   status_text('halted improperly');
-//        message_text('halted improperly');
+	   status_text("halted improperly");
+       message_text("halted");
     }
 
 };
@@ -36,31 +36,44 @@ var halting_message_steps = function(n, p, m) {
 
     //TODO: Look into more informative halting messages
     if (n == p.length) {
-//	status_text('halted properly after '.concat(String(m),' steps'));
-        message_text('halted properly after '.concat(String(m),' steps'));
+//	status_text("halted properly after ".concat(String(m)," steps"));
+        status_text("halted properly");
+        message_text("halted properly after ".concat(String(m)," steps"));
     }
     else {
-//	status_text('halted improperly after '.concat(String(m),' steps'));
-        message_text('halted improperly after '.concat(String(m),' steps'));
+//	status_text("halted improperly after ".concat(String(m)," steps"));
+        status_text("halted properly");
+        message_text("halted improperly after ".concat(String(m)," steps"));
     }
 
 };
 
 var running_message = function(n, p, m) {
 
-//    status_text('executed '.concat(String(m),' steps; next instruction is ', String(n), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
-    message_text('executed '.concat(String(m),' steps; next instruction is ', String(n+1), ': ', '1'.repeat(p[n][0]), '#'.repeat(p[n][1])));
+//    status_text("executed ".concat(String(m)," steps; next instruction is ", String(n), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
+    message_text("executed ".concat(String(m)," steps; next instruction is ", String(n+1), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
 }
 
 var eval_message = function() {
 
-    status_text('running...');
+    status_text("running...");
 };
 
 var interrupt_message = function() {
 
-    status_text('execution interrupted');
+    status_text("execution interrupted");
+    message_text("interrupted");
 };
+
+var timeout_message = function() {
+    status_text("timeout: execution aborted");
+    message_text("aborted");
+}
+
+var pause_message = function() {
+
+    status_text("paused");
+}
 
 //
 // DOM register management routines
@@ -235,25 +248,25 @@ var eval_button_ready = function() {
     $('#interrupt').prop('disabled', true);
     $('#interrupt').off('click');
     $('#evaluate').prop('disabled', false);
+    $('#pause').prop('disabled', true);
     $('#eval_slow').prop('disabled', false);
-//    $('#eval_step').prop('disabled', false);
+    $('#eval_step').prop('disabled', false);
+    $('#reset_machine').prop('disabled', false);
 };
 
 var eval_button_busy = function() {
 
-    $('#interrupt').prop('disabled', false);
+//    $('#interrupt').prop('disabled', false);
     $('#evaluate').prop('disabled', true);
     $('#eval_slow').prop('disabled', true);
     $('#eval_step').prop('disabled', true);
+    $('#reset_machine').prop('disabled', true);
 };
 
 var evaluate = function() {
 
     if (halted) return;
-    
-    message_text('running...');
-    eval_button_busy();
-    eval_message();
+    if (pos != 0) return;
     
     // Parse program
 //    var p = vernacular_compile($('#program').val());
@@ -265,6 +278,13 @@ var evaluate = function() {
 	   return;
     }
 
+    if (p.length == 0) return;
+
+    message_text("running...");
+    eval_button_busy();
+    $('#interrupt').prop('disabled', false);
+    eval_message();
+    
     // Move dom registers to array
     var regs = [[]];
     regs = dom_regs_to_array();
@@ -276,23 +296,33 @@ var evaluate = function() {
         interrupt_message();
         halted = true;
 //    	eval_button_ready();
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
     });
     thread.onmessage = function(e) {
 
     	halting_message(e.data[0], p);
-    	array_to_dom_regs(e.data[1]);
-    	eval_button_ready();
+        array_to_dom_regs(e.data[1]);
+        halted = true;
+//    	eval_button_ready();
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
     };
     thread.postMessage([p, regs]);
-    message_text("ready");
+
+    setTimeout(timeout_evaluate, 2000);
+    function timeout_evaluate() {
+        thread.terminate();
+        timeout_message();
+        halted = true;
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
+    }
 };
 
 var eval_slow = function() {
 
     if (halted) return;
-    
-    eval_button_busy();
-    eval_message();
     
     // Parse program
 //    var p = vernacular_compile($('#program').val());
@@ -303,6 +333,14 @@ var eval_slow = function() {
     else {
 	   return;
     }
+
+    if (p.length == 0) return;
+
+    eval_button_busy();
+    $('#pause').prop('disabled', false);
+    eval_message();
+    
+    if (n_steps == 0) running_message(pos, p, n_steps);
 
     // Move dom registers to array
     var regs = [[]];
@@ -312,24 +350,32 @@ var eval_slow = function() {
 
     // Start worker and make kill button active
     var thread = new Worker('eval-slow.js');
-    $('#interrupt').click(function() {
+    $('#pause').click(function() {
 
     	thread.terminate();
-        interrupt_message();
-        halted = true;
+        pause_message();
+//        halted = true;
 //    	eval_button_ready();
+        $('#pause').prop('disabled', true);
+        $('#eval_slow').prop('disabled', false);
+        $('#eval_step').prop('disabled', false);
+        $('#reset_machine').prop('disabled', false);
     });
     thread.onmessage = function(e) {
 
     	if (e.data[2]) {
             halting_message_steps(e.data[0], p, e.data[3]);
-            halting_message(e.data[0], p);
-    	    eval_button_ready();
+            halted = true;
+//    	    eval_button_ready();
+            $('#pause').prop('disabled', true);
+            $('#reset_machine').prop('disabled', false);
     	}
         array_to_dom_regs(e.data[1]);
-        running_message(e.data[0], p, e.data[3]);
+        pos = e.data[0];
+        n_steps = e.data[3];
+        running_message(pos, p, n_steps);
     };
-    thread.postMessage([p, regs, interval]);
+    thread.postMessage([p, regs, pos, n_steps, interval]);
 };
 
 var pos = 0;
@@ -339,22 +385,26 @@ var n_steps = 0;
 var eval_step = function() {
 
     if (halted) return;
-    eval_button_busy();
-    $('#interrupt').prop('disabled', true);
-    eval_message();
-    
-    // Move dom registers to array
-    var regs = dom_regs_to_array();
 
     // Parse program
 //    var p = vernacular_compile($('#program').val());
     var parsed = parse_program();
     if (parsed[0]) {
-    	var p = parsed[1];
+        var p = parsed[1];
     }
     else {
-	   return;
+        return;
     }
+
+    if (p.length == 0) return;
+
+    eval_button_busy();
+//    $('#interrupt').prop('disabled', true);
+//    $('#pause').prop('disabled', true);
+    eval_message();
+    
+    // Move dom registers to array
+    var regs = dom_regs_to_array();
 
     if (pos < 0 || p.length <= pos) return;
     var new_pos = step(p, pos, regs);
@@ -362,6 +412,7 @@ var eval_step = function() {
     if (new_pos < 0 || p.length <= new_pos) {
         halting_message_steps(new_pos, p, n_steps);
         halting_message(new_pos, p);
+//        $('#eval_step').prop('disabled', true);
 	    halted = true;
     } else {
 //	    status_text('executed '.concat(String(n_steps),' steps'));
@@ -371,8 +422,12 @@ var eval_step = function() {
     array_to_dom_regs(regs);
     if (!halted) {
 //      eval_button_ready();
+        $('#interrupt').prop('disabled', true);
         $('#eval_step').prop('disabled', false);
+        $('#eval_slow').prop('disabled', false);
+        pause_message();
     };
+    $('#reset_machine').prop('disabled', false);
 };
 
 var reset_machine = function() {
@@ -380,7 +435,7 @@ var reset_machine = function() {
     halted = false;
     n_steps = 0;
     eval_button_ready();
-    $('#eval_step').prop('disabled', false);
+//    $('#eval_step').prop('disabled', false);
     status_text("a 1# interpreter for web browsers (type '?' for help)");
     message_text("ready");
 }
