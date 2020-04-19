@@ -14,20 +14,13 @@ var message_text = function(text) {
 
 var halting_message = function(n, p) {
 
-    //TODO: Look into more informative halting messages
-//    if (n==0 && p.length > 0) {
-//	   status_text('halted improperly');
-//    }
-//    else {
-//	   status_text('halted properly');
-//    }
     if (n == p.length) {
 	   status_text("halted properly");
-       message_text("halted");
+       message_text("ready");
     }
     else {
 	   status_text("halted improperly");
-       message_text("halted");
+       message_text("ready");
     };
 };
 
@@ -238,7 +231,7 @@ var parse_program = function() {
 
 var clear_program = function() {
 
-    $('#program').val('')
+    $('#program').val('');
 };
 
 var eval_button_ready = function() {
@@ -262,6 +255,18 @@ var eval_button_busy = function() {
     $('#reset_machine').prop('disabled', true);
 };
 
+var textarea_ready = function() {
+
+    $('#clear_program').prop('disabled', false);
+    $('#program').prop('readonly', false);
+};
+
+var textarea_busy = function() {
+
+    $('#clear_program').prop('disabled', true);
+    $('#program').prop('readonly', true);
+}
+
 var evaluate = function() {
 
     if (halted) return;
@@ -281,6 +286,7 @@ var evaluate = function() {
 
     message_text("running...");
     eval_button_busy();
+    textarea_busy();
     $('#interrupt').prop('disabled', false);
     eval_message();
     
@@ -314,8 +320,10 @@ var evaluate = function() {
         clearTimeout(timeoutID);
     	halting_message(e.data[0], p);
         array_to_dom_regs(e.data[1]);
-        halted = true;
-//    	eval_button_ready();
+//        halted = true;
+        halted = false;
+        eval_button_ready();
+        textarea_ready();
         $('#interrupt').prop('disabled', true);
         $('#reset_machine').prop('disabled', false);
     };
@@ -340,6 +348,7 @@ var eval_slow = function() {
     if (p.length == 0) return;
 
     eval_button_busy();
+    textarea_busy();
     $('#pause').prop('disabled', false);
     eval_message();
     
@@ -406,6 +415,7 @@ var eval_step = function() {
     if (p.length == 0) return;
 
     eval_button_busy();
+    textarea_busy();
 //    $('#interrupt').prop('disabled', true);
 //    $('#pause').prop('disabled', true);
     eval_message();
@@ -454,6 +464,7 @@ var back = function() {
 
     message_text("running...");
     eval_button_busy();
+    textarea_busy();
     $('#interrupt').prop('disabled', false);
     eval_message();
 
@@ -511,6 +522,7 @@ var reset_machine = function() {
     array_to_dom_regs(saved_regs);
 
     eval_button_ready();
+    textarea_ready();
 //    $('#eval_step').prop('disabled', false);
     status_text("a 1# interpreter for web browsers (type '?' for help)");
     message_text("ready");
@@ -656,6 +668,7 @@ $(document).ready(function() {
     // prep editor tab
     extend_registers(1);
     eval_button_ready();
+    textarea_ready();
 
     // click handlers
     $('#remove_register').click(remove_last_register);
@@ -680,6 +693,11 @@ $(document).ready(function() {
         $('div.modal').modal('hide');
     });
 
+    $('[data-toggle="tooltip"]').tooltip({trigger: "hover"});
+    $('[data-toggle="tooltip"]').click(function () {
+        $('[data-toggle="tooltip"]').tooltip("hide");
+    });
+
     // keyboard inputs
     $('body').keypress(function(e) {
         if (e.keyCode == 27) {
@@ -695,9 +713,11 @@ $(document).ready(function() {
 
             // these shortcuts are available for editor tab only
             if ($("li[class=active] > #editor-tab").length) {
+                /*
                 if (e.which == 99) { // 'c'
                     $('#clear_program').click();
                 };
+                */
                 if (e.which == 111) { // 'o'
                     $('#open-modal').modal('show');
                 };
