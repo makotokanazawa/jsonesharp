@@ -28,8 +28,7 @@ var halting_message = function(n, p) {
     else {
 	   status_text("halted improperly");
        message_text("halted");
-    }
-
+    };
 };
 
 var halting_message_steps = function(n, p, m) {
@@ -44,8 +43,7 @@ var halting_message_steps = function(n, p, m) {
 //	status_text("halted improperly after ".concat(String(m)," steps"));
         status_text("halted properly");
         message_text("halted improperly after ".concat(String(m)," steps"));
-    }
-
+    };
 };
 
 var running_message = function(n, p, m) {
@@ -137,11 +135,10 @@ var update_register_buttons = function(m) {
     $('#remove_register').html('remove R'.concat((m-1).toString()));
     if (m==2) {
 	// Disable remove register button when there's only one register
-	$('#remove_register').prop("disabled", true);
-    }
-    else {
-	$('#remove_register').prop("disabled", false);
-    }
+	    $('#remove_register').prop("disabled", true);
+    } else {
+	    $('#remove_register').prop("disabled", false);
+    };
 };
 
 var extend_registers = function(n) {
@@ -166,10 +163,12 @@ var remove_last_register = function() {
     var m = $('.register').length;
 
     if (m > 1) {
-	var sel = '#'.concat('form_group_register_'.concat(m.toString()));
-	$(sel).remove();
-	update_register_buttons(m);
-    }
+//	    var sel = '#'.concat('form_group_register_'.concat(m.toString()));
+        var e = $('#form_group_register_'.concat(m.toString()));
+//	    $(sel).remove();
+        e.remove();
+	    update_register_buttons(m);
+    };
 };
 
 //
@@ -179,13 +178,13 @@ var remove_last_register = function() {
 
 var dom_regs_to_array = function() {
 
-    var dom_regs = $('.register')
-    var regs = [[]];
+    var dom_regs = $('.register');
+    var regs = [[]]; // the first element of the array is not used
 
     var id = '';
-    var i = 0;
-    while (i < dom_regs.length) {
-    	id = '#register_'.concat((i+1).toString());
+    var i = 1;
+    while (i <= dom_regs.length) {
+    	id = '#register_'.concat(i.toString());
     	regs.push($(id).val().split(''));
     	i++;
     }
@@ -195,27 +194,26 @@ var dom_regs_to_array = function() {
 
 var array_to_dom_regs = function(regs) {
 
-    var m = $('.registers').length
+    var m = $('.register').length;
     
-    if (regs.length < m) {
-    	while (regs.length < m) {
+    if (regs.length < m+1) {
+    	while (regs.length < m+1) {
     	    remove_last_register();
     	    m--;
     	}
-    }
-    else {
-	   extend_registers(regs.length-1);
-    }
+    } else {
+	    extend_registers(regs.length-1);
+    };
 
     var id = '';
     var i = 1;
-    var h = 0;
+
     while (i < regs.length) {
-	id = '#register_'.concat(i.toString()); 
-	$(id).val(regs[i].join(''));
-	resize_text_area($(id));
-	i++;
-    }
+	    id = '#register_'.concat(i.toString()); 
+	    $(id).val(regs[i].join(''));
+	    resize_text_area($(id));
+	    i++;
+    };
 };
 
 //
@@ -230,7 +228,7 @@ var parse_program = function() {
     	status_text('syntax error');
     	eval_button_ready();
     	return [false, parsed[1]];
-    }
+    };
     return [true, parsed[1]];
 };
 
@@ -251,6 +249,7 @@ var eval_button_ready = function() {
     $('#pause').prop('disabled', true);
     $('#eval_slow').prop('disabled', false);
     $('#eval_step').prop('disabled', false);
+    $('#back').prop('disabled', true);
     $('#reset_machine').prop('disabled', false);
 };
 
@@ -286,8 +285,9 @@ var evaluate = function() {
     eval_message();
     
     // Move dom registers to array
-    var regs = [[]];
-    regs = dom_regs_to_array();
+    var regs = dom_regs_to_array();
+
+    saved_regs = dom_regs_to_array();
 
     // Start worker and make kill button active
     var thread = new Worker('evaluate.js');
@@ -299,8 +299,19 @@ var evaluate = function() {
         $('#interrupt').prop('disabled', true);
         $('#reset_machine').prop('disabled', false);
     });
+
+    var timeoutID = setTimeout(function() {
+        thread.terminate();
+        timeout_message();
+        halted = true;
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
+    }, 
+    2000);
+    
     thread.onmessage = function(e) {
 
+        clearTimeout(timeoutID);
     	halting_message(e.data[0], p);
         array_to_dom_regs(e.data[1]);
         halted = true;
@@ -308,16 +319,8 @@ var evaluate = function() {
         $('#interrupt').prop('disabled', true);
         $('#reset_machine').prop('disabled', false);
     };
-    thread.postMessage([p, regs]);
 
-    setTimeout(timeout_evaluate, 2000);
-    function timeout_evaluate() {
-        thread.terminate();
-        timeout_message();
-        halted = true;
-        $('#interrupt').prop('disabled', true);
-        $('#reset_machine').prop('disabled', false);
-    }
+    thread.postMessage([p, regs]);
 };
 
 var eval_slow = function() {
@@ -332,7 +335,7 @@ var eval_slow = function() {
     }
     else {
 	   return;
-    }
+    };
 
     if (p.length == 0) return;
 
@@ -343,8 +346,9 @@ var eval_slow = function() {
     if (n_steps == 0) running_message(pos, p, n_steps);
 
     // Move dom registers to array
-    var regs = [[]];
-    regs = dom_regs_to_array();
+    var regs = dom_regs_to_array();
+
+    if (n_steps == 0) saved_regs = dom_regs_to_array();
 
     var interval = document.getElementById("speed").value;
 
@@ -363,17 +367,20 @@ var eval_slow = function() {
     });
     thread.onmessage = function(e) {
 
-    	if (e.data[2]) {
-            halting_message_steps(e.data[0], p, e.data[3]);
+        array_to_dom_regs(e.data[1]);
+        n_steps = e.data[3];
+        pos = e.data[0];
+        if (e.data[2]) {
+            halting_message_steps(pos, p, n_steps);
             halted = true;
 //    	    eval_button_ready();
             $('#pause').prop('disabled', true);
             $('#reset_machine').prop('disabled', false);
-    	}
-        array_to_dom_regs(e.data[1]);
-        pos = e.data[0];
-        n_steps = e.data[3];
-        running_message(pos, p, n_steps);
+            if (n_steps > 0) $('#back').prop('disabled', false);
+    	} else {
+//            array_to_dom_regs(e.data[1]);
+            running_message(pos, p, n_steps);
+        };
     };
     thread.postMessage([p, regs, pos, n_steps, interval]);
 };
@@ -381,6 +388,7 @@ var eval_slow = function() {
 var pos = 0;
 var halted = false;
 var n_steps = 0;
+var saved_regs = [[]];
 
 var eval_step = function() {
 
@@ -391,10 +399,9 @@ var eval_step = function() {
     var parsed = parse_program();
     if (parsed[0]) {
         var p = parsed[1];
-    }
-    else {
+    } else {
         return;
-    }
+    };
 
     if (p.length == 0) return;
 
@@ -406,12 +413,15 @@ var eval_step = function() {
     // Move dom registers to array
     var regs = dom_regs_to_array();
 
+    if (n_steps == 0) saved_regs = dom_regs_to_array();
+
     if (pos < 0 || p.length <= pos) return;
+
     var new_pos = step(p, pos, regs);
     n_steps++;
+    if (n_steps > 0) $('#back').prop('disabled', false);
     if (new_pos < 0 || p.length <= new_pos) {
         halting_message_steps(new_pos, p, n_steps);
-        halting_message(new_pos, p);
 //        $('#eval_step').prop('disabled', true);
 	    halted = true;
     } else {
@@ -430,10 +440,76 @@ var eval_step = function() {
     $('#reset_machine').prop('disabled', false);
 };
 
+var back = function() {
+    // Parse program
+//    var p = vernacular_compile($('#program').val());
+    var parsed = parse_program();
+    if (parsed[0]) {
+        var p = parsed[1];
+    } else {
+        return;
+    };
+
+    if (p.length == 0 || n_steps == 0) return;
+
+    message_text("running...");
+    eval_button_busy();
+    $('#interrupt').prop('disabled', false);
+    eval_message();
+
+    // Start worker and make kill button active
+    var thread = new Worker('eval-for.js');
+    $('#interrupt').click(function() {
+        thread.terminate();
+        interrupt_message();
+        halted = true;
+    //  eval_button_ready();
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
+    });
+    thread.onmessage = function(e) {
+
+        clearTimeout(timeoutID);
+        array_to_dom_regs(e.data[1]);
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
+        pos = e.data[0];
+        n_steps = e.data[3];
+        if (n_steps == 0) $('#back').prop('disabled', true);
+        if (e.data[2]) {
+            halting_message_steps(pos, p, n_steps);
+            halted = true;
+            //  eval_button_ready();
+            $('#pause').prop('disabled', true);
+        } else {
+            running_message(pos, p, n_steps);
+            halted = false;
+            $('#eval_step').prop('disabled', false);
+            $('#eval_slow').prop('disabled', false);
+            pause_message();
+        };
+    };
+
+    n_steps--;
+    thread.postMessage([p, saved_regs, 0, n_steps]);
+
+    var timeoutID = setTimeout(function() {
+        thread.terminate();
+        timeout_message();
+        halted = true;
+        $('#interrupt').prop('disabled', true);
+        $('#reset_machine').prop('disabled', false);
+    }, 
+    2000);
+};
+
 var reset_machine = function() {
     pos = 0;
     halted = false;
     n_steps = 0;
+
+    array_to_dom_regs(saved_regs);
+
     eval_button_ready();
 //    $('#eval_step').prop('disabled', false);
     status_text("a 1# interpreter for web browsers (type '?' for help)");
@@ -493,8 +569,7 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
         new_button.click(load_program);
         new_button.tooltip();
         new_panel.append(new_button);
-    }
-    else if (tabpanel_id == 'save-modal-panel') {
+    } else if (tabpanel_id == 'save-modal-panel') {
         var new_button = $('<a>');
         new_button.attr({'class': 'btn btn-primary save-over', 'type': 'button', 
             'role': 'button'});
@@ -510,8 +585,7 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
             $('div.modal').modal('hide');
         });
         new_panel.append(new_button);
-    }
-    else if (tabpanel_id == 'open-modal-panel') {
+    } else if (tabpanel_id == 'open-modal-panel') {
         var new_button = $('<a>');
         new_button.attr({'class': 'btn btn-primary open', 'type': 'button', 
             'role': 'button'});
@@ -521,7 +595,7 @@ var add_workshop_page = function(title, program_text, active, tabpanel_id) {
             $('div.modal').modal('hide');
         });
         new_panel.append(new_button);
-    }
+    };
 
     tab_content.append(new_panel);
 
@@ -590,6 +664,7 @@ $(document).ready(function() {
     $('#evaluate').click(evaluate);
     $('#eval_slow').click(eval_slow);
     $('#eval_step').click(eval_step);
+    $('#back').click(back);
     $('#reset_machine').click(reset_machine);
     $('a.wk-pload').click(load_program);
     $('#save_as_new').click(function () {
@@ -610,53 +685,51 @@ $(document).ready(function() {
         if (e.keyCode == 27) {
             $('div.modal').modal('hide');
             $('*').blur();
-        }
+        };
 
         // intercept other keyboard inputs only if not in a text area
         if (!$('input,textarea').is(':focus')) {
             if (e.which == 63) { // '?'
                 $("#help-modal").modal('show');
-            }
+            };
 
             // these shortcuts are available for editor tab only
             if ($("li[class=active] > #editor-tab").length) {
                 if (e.which == 99) { // 'c'
                     $('#clear_program').click();
-                }
+                };
                 if (e.which == 111) { // 'o'
                     $('#open-modal').modal('show');
-                }
+                };
                 if (e.which == 114) { // 'r'
                     $('#eval_slow').click();
-                }
+                };
                 if (e.which == 115) { // 's'
                     $('#save-modal').modal('show');
-                }
-                if (e.which == 116) { // 't'
+                };
+                if (e.which == 102) { // 'f'
                     $("#eval_step").click();
-                }   
+                };  
+                if (e.which == 98) { // 'b'
+                    $("#back").click();
+                };  
                 if (e.which == 118) { // 'v'
                     $('#evaluate').click();
-                }
+                };
                 if (e.which == 119) { // 'w'
                     $("#workshop-tab").click();
-                }
-            }
+                };
+            };
 
             // these shortcuts are available for workshop tab only
             if ($("li[class=active] > #workshop-tab").length) {
                 if (e.which == 101) { // 'e'
                     $("#editor-tab").click();
-                }
+                };
                 if (e.which == 108) { // 'l'
                     $('#workshop div[class="tab-pane active"] a').click();
-                }
-            }
-            
-            
-        }
-        
+                };
+            };
+        };
     });
-
-    
 });
