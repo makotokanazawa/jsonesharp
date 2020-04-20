@@ -47,7 +47,7 @@ var halting_message_steps = function(n, p, m) {
 var running_message = function(n, p, m) {
 
 //    status_text("executed ".concat(String(m)," steps; next instruction is ", String(n), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
-    status_text("running..."); // uncommenting this makes the "running..." message not disappear
+    // status_text("running..."); // uncommenting this makes the "running..." message not disappear in Mac Safari
     if (n < p.length) {
         message_text("executed ".concat(String(m)," steps; next instruction is ", String(n+1), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
     };
