@@ -1,5 +1,5 @@
 //
-// status line
+// status and message lines
 //
 
 var status_text = function(text) {
@@ -11,6 +11,12 @@ var message_text = function(text) {
 
     $('#message').text(text);
 };
+
+var ready_message = function() {
+    
+    status_text("a 1# interpreter for web browsers (type '?' for help)");
+    message_text("ready");
+}
 
 var halting_message = function(n, p) {
 
@@ -26,7 +32,6 @@ var halting_message = function(n, p) {
 
 var halting_message_steps = function(n, p, m) {
 
-    //TODO: Look into more informative halting messages
     if (n == p.length) {
 //	status_text("halted properly after ".concat(String(m)," steps"));
         status_text("halted properly");
@@ -42,12 +47,16 @@ var halting_message_steps = function(n, p, m) {
 var running_message = function(n, p, m) {
 
 //    status_text("executed ".concat(String(m)," steps; next instruction is ", String(n), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
-    message_text("executed ".concat(String(m)," steps; next instruction is ", String(n+1), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
+    status_text("running..."); // uncommenting this makes the "running..." message not disappear
+    if (n < p.length) {
+        message_text("executed ".concat(String(m)," steps; next instruction is ", String(n+1), ": ", "1".repeat(p[n][0]), '#'.repeat(p[n][1])));
+    };
 }
 
 var eval_message = function() {
 
     status_text("running...");
+    message_text("running...");
 };
 
 var interrupt_message = function() {
@@ -234,6 +243,100 @@ var clear_program = function() {
     $('#program').val('');
 };
 
+var pos = 0;
+var halted = false;
+var n_steps = 0;
+var saved_regs = [[]];
+
+var button_ready = function() {
+
+    $('#clear_program').prop('disabled', false);
+    $('#add_register').prop('disabled', false);
+    if ($('.register').length > 1) {
+        $('#remove_register').prop('disabled', false);
+    } else {
+        $('#remove_register').prop('disabled', true);
+    }
+    $('#evaluate').prop('disabled', false);
+    $('#interrupt').prop('disabled', true);
+    $('#interrupt').off('click'); // not necessary?
+    $('#eval_slow').prop('disabled', false);
+    $('#pause').prop('disabled', true);
+    $('#eval_step').prop('disabled', false);
+    $('#back').prop('disabled', true);
+    $('#reset_machine').prop('disabled', false);
+    $('#open').prop('disabled', false);
+//    $('#save-modal').prop('disabled', false);
+
+    $('#program').prop('readonly', false);
+}
+
+var button_busy = function() {
+
+    $('#clear_program').prop('disabled', true);
+    $('#add_register').prop('disabled', true);
+    $('#remove_register').prop('disabled', true);
+    $('#evaluate').prop('disabled', true);
+    $('#interrupt').prop('disabled', false);
+    $('#eval_slow').prop('disabled', true);
+    $('#pause').prop('disabled', true);
+    $('#eval_step').prop('disabled', true);
+    $('#back').prop('disabled', true);
+    $('#reset_machine').prop('disabled', true);
+    $('#open').prop('disabled', true);
+//    $('#save-modal').prop('disabled', false);
+
+    $('#program').prop('readonly', true);
+}
+
+var button_running = function() {
+
+    $('#clear_program').prop('disabled', true);
+    $('#add_register').prop('disabled', true);
+    $('#remove_register').prop('disabled', true);
+    $('#evaluate').prop('disabled', true);
+    $('#interrupt').prop('disabled', true);
+    $('#interrupt').off('click');
+    $('#eval_slow').prop('disabled', true);
+    $('#pause').prop('disabled', false);
+    $('#eval_step').prop('disabled', true);
+    $('#back').prop('disabled', true);
+    $('#reset_machine').prop('disabled', true);
+    $('#open').prop('disabled', true);
+//    $('#save-modal').prop('disabled', false);
+
+    $('#program').prop('readonly', true);
+}
+
+var button_paused = function() {
+
+    $('#clear_program').prop('disabled', true);
+    $('#add_register').prop('disabled', true);
+    $('#remove_register').prop('disabled', true);
+    $('#evaluate').prop('disabled', true);
+    if (halted) {
+        $('#eval_slow').prop('disabled', true);
+        $('#eval_step').prop('disabled', true);
+    } else {
+        $('#eval_slow').prop('disabled', false);
+        $('#eval_step').prop('disabled', false);
+    }
+    $('#interrupt').prop('disabled', true);
+    $('#interrupt').off('click');
+    $('#pause').prop('disabled', true);
+    if (n_steps == 0) {
+        $('#back').prop('disabled', true);
+    } else {
+        $('#back').prop('disabled', false);
+    }
+    $('#reset_machine').prop('disabled', false);
+    $('#open').prop('disabled', true);
+//    $('#save-modal').prop('disabled', false);
+
+    $('#program').prop('readonly', true);
+}
+
+/*
 var eval_button_ready = function() {
 
     $('#interrupt').prop('disabled', true);
@@ -248,13 +351,31 @@ var eval_button_ready = function() {
 
 var eval_button_busy = function() {
 
-//    $('#interrupt').prop('disabled', false);
+    $('#interrupt').prop('disabled', false);
     $('#evaluate').prop('disabled', true);
     $('#eval_slow').prop('disabled', true);
     $('#eval_step').prop('disabled', true);
     $('#reset_machine').prop('disabled', true);
 };
+*/
 
+var reset_machine = function() {
+    pos = 0;
+    halted = false;
+    n_steps = 0;
+
+    array_to_dom_regs(saved_regs);
+
+    button_ready();
+//    eval_button_ready();
+//    textarea_ready();
+//    $('#eval_step').prop('disabled', false);
+    ready_message();
+//    status_text("a 1# interpreter for web browsers (type '?' for help)");
+//    message_text("ready");
+}
+
+/*
 var textarea_ready = function() {
 
     $('#clear_program').prop('disabled', false);
@@ -266,6 +387,7 @@ var textarea_busy = function() {
     $('#clear_program').prop('disabled', true);
     $('#program').prop('readonly', true);
 }
+*/
 
 var evaluate = function() {
 
@@ -284,10 +406,9 @@ var evaluate = function() {
 
     if (p.length == 0) return;
 
-    message_text("running...");
-    eval_button_busy();
-    textarea_busy();
-    $('#interrupt').prop('disabled', false);
+    button_busy();
+//    eval_button_busy();
+//    textarea_busy();
     eval_message();
     
     // Move dom registers to array
@@ -303,6 +424,7 @@ var evaluate = function() {
         halted = true;
 //    	eval_button_ready();
         $('#interrupt').prop('disabled', true);
+        $('#interrupt').off('click');
         $('#reset_machine').prop('disabled', false);
     });
 
@@ -311,6 +433,7 @@ var evaluate = function() {
         timeout_message();
         halted = true;
         $('#interrupt').prop('disabled', true);
+        $('#interrupt').off('click'); // not necessary?
         $('#reset_machine').prop('disabled', false);
     }, 
     2000);
@@ -322,10 +445,11 @@ var evaluate = function() {
         array_to_dom_regs(e.data[1]);
 //        halted = true;
         halted = false;
-        eval_button_ready();
-        textarea_ready();
-        $('#interrupt').prop('disabled', true);
-        $('#reset_machine').prop('disabled', false);
+        button_ready();
+//        eval_button_ready();
+//        textarea_ready();
+//        $('#interrupt').prop('disabled', true);
+//        $('#reset_machine').prop('disabled', false);
     };
 
     thread.postMessage([p, regs]);
@@ -347,9 +471,10 @@ var eval_slow = function() {
 
     if (p.length == 0) return;
 
-    eval_button_busy();
-    textarea_busy();
-    $('#pause').prop('disabled', false);
+    button_running();
+//    eval_button_busy();
+//    textarea_busy();
+//    $('#pause').prop('disabled', false);
     eval_message();
     
     if (n_steps == 0) running_message(pos, p, n_steps);
@@ -361,18 +486,18 @@ var eval_slow = function() {
 
     var interval = document.getElementById("speed").value;
 
-    // Start worker and make kill button active
+    // Start worker and make pause button active
     var thread = new Worker('eval-slow.js');
     $('#pause').click(function() {
 
     	thread.terminate();
         pause_message();
-//        halted = true;
+        button_paused();
 //    	eval_button_ready();
-        $('#pause').prop('disabled', true);
-        $('#eval_slow').prop('disabled', false);
-        $('#eval_step').prop('disabled', false);
-        $('#reset_machine').prop('disabled', false);
+//        $('#pause').prop('disabled', true);
+//        $('#eval_slow').prop('disabled', false);
+//        $('#eval_step').prop('disabled', false);
+//        $('#reset_machine').prop('disabled', false);
     });
     thread.onmessage = function(e) {
 
@@ -380,12 +505,13 @@ var eval_slow = function() {
         n_steps = e.data[3];
         pos = e.data[0];
         if (e.data[2]) {
-            halting_message_steps(pos, p, n_steps);
             halted = true;
+            button_paused();
+            halting_message_steps(pos, p, n_steps);
 //    	    eval_button_ready();
-            $('#pause').prop('disabled', true);
-            $('#reset_machine').prop('disabled', false);
-            if (n_steps > 0) $('#back').prop('disabled', false);
+//            $('#pause').prop('disabled', true);
+//            $('#reset_machine').prop('disabled', false);
+//            if (n_steps > 0) $('#back').prop('disabled', false);
     	} else {
 //            array_to_dom_regs(e.data[1]);
             running_message(pos, p, n_steps);
@@ -393,11 +519,6 @@ var eval_slow = function() {
     };
     thread.postMessage([p, regs, pos, n_steps, interval]);
 };
-
-var pos = 0;
-var halted = false;
-var n_steps = 0;
-var saved_regs = [[]];
 
 var eval_step = function() {
 
@@ -414,11 +535,12 @@ var eval_step = function() {
 
     if (p.length == 0) return;
 
-    eval_button_busy();
-    textarea_busy();
+    button_busy(); // not necessary?
+//    eval_button_busy();
+//    textarea_busy();
 //    $('#interrupt').prop('disabled', true);
 //    $('#pause').prop('disabled', true);
-    eval_message();
+    eval_message(); // not necessary?
     
     // Move dom registers to array
     var regs = dom_regs_to_array();
@@ -427,19 +549,23 @@ var eval_step = function() {
 
     if (pos < 0 || p.length <= pos) return;
 
-    var new_pos = step(p, pos, regs);
+    pos = step(p, pos, regs);
     n_steps++;
     if (n_steps > 0) $('#back').prop('disabled', false);
-    if (new_pos < 0 || p.length <= new_pos) {
-        halting_message_steps(new_pos, p, n_steps);
+    if (pos < 0 || p.length <= pos) {
+        halting_message_steps(pos, p, n_steps);
 //        $('#eval_step').prop('disabled', true);
 	    halted = true;
     } else {
 //	    status_text('executed '.concat(String(n_steps),' steps'));
-        running_message(new_pos, p, n_steps);
+        running_message(pos, p, n_steps);
+        pause_message();
     };
-    pos = new_pos;
+
     array_to_dom_regs(regs);
+
+    button_paused();
+/*
     if (!halted) {
 //      eval_button_ready();
         $('#interrupt').prop('disabled', true);
@@ -448,6 +574,7 @@ var eval_step = function() {
         pause_message();
     };
     $('#reset_machine').prop('disabled', false);
+*/
 };
 
 var back = function() {
@@ -462,10 +589,11 @@ var back = function() {
 
     if (p.length == 0 || n_steps == 0) return;
 
-    message_text("running...");
-    eval_button_busy();
-    textarea_busy();
-    $('#interrupt').prop('disabled', false);
+    button_busy();
+//    message_text("running...");
+//    eval_button_busy();
+//    textarea_busy();
+//    $('#interrupt').prop('disabled', false);
     eval_message();
 
     // Start worker and make kill button active
@@ -476,57 +604,42 @@ var back = function() {
         halted = true;
     //  eval_button_ready();
         $('#interrupt').prop('disabled', true);
+        $('#interrupt').off('click');
         $('#reset_machine').prop('disabled', false);
     });
-    thread.onmessage = function(e) {
-
-        clearTimeout(timeoutID);
-        array_to_dom_regs(e.data[1]);
-        $('#interrupt').prop('disabled', true);
-        $('#reset_machine').prop('disabled', false);
-        pos = e.data[0];
-        n_steps = e.data[3];
-        if (n_steps == 0) $('#back').prop('disabled', true);
-        if (e.data[2]) {
-            halting_message_steps(pos, p, n_steps);
-            halted = true;
-            //  eval_button_ready();
-            $('#pause').prop('disabled', true);
-        } else {
-            running_message(pos, p, n_steps);
-            halted = false;
-            $('#eval_step').prop('disabled', false);
-            $('#eval_slow').prop('disabled', false);
-            pause_message();
-        };
-    };
-
-    n_steps--;
-    thread.postMessage([p, saved_regs, 0, n_steps]);
 
     var timeoutID = setTimeout(function() {
         thread.terminate();
         timeout_message();
         halted = true;
         $('#interrupt').prop('disabled', true);
+        $('#interrupt').off('click'); // not necessary?
         $('#reset_machine').prop('disabled', false);
     }, 
-    2000);
+    2000);    
+
+    thread.onmessage = function(e) {
+
+        clearTimeout(timeoutID);
+        array_to_dom_regs(e.data[1]);
+        pos = e.data[0];
+        n_steps = e.data[3];
+        if (e.data[2]) {
+            halting_message_steps(pos, p, n_steps);
+            halted = true;
+            //  eval_button_ready();
+        } else {
+            running_message(pos, p, n_steps);
+            halted = false;
+            pause_message();
+        };
+
+        button_paused();
+    };
+
+    n_steps--;
+    thread.postMessage([p, saved_regs, 0, n_steps]);
 };
-
-var reset_machine = function() {
-    pos = 0;
-    halted = false;
-    n_steps = 0;
-
-    array_to_dom_regs(saved_regs);
-
-    eval_button_ready();
-    textarea_ready();
-//    $('#eval_step').prop('disabled', false);
-    status_text("a 1# interpreter for web browsers (type '?' for help)");
-    message_text("ready");
-}
 
 var load_program = function() {
     var text = $(this).siblings("p.program-text").text().trim();
@@ -667,8 +780,10 @@ $(document).ready(function() {
 
     // prep editor tab
     extend_registers(1);
-    eval_button_ready();
-    textarea_ready();
+
+    button_ready();
+//    eval_button_ready();
+//    textarea_ready();
 
     // click handlers
     $('#remove_register').click(remove_last_register);
