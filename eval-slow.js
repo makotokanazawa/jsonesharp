@@ -16,10 +16,10 @@ self.onmessage = function(e) {
 //	    if (new_pos == pos) {
 //        if (new_pos < 0 || p.length <= new_pos) {
         if (pos < 0 || p.length <= pos) {
-	        clearInterval(eval_loop);
 //	        self.postMessage([pos, regs, true]);
 //            self.postMessage([new_pos, regs, true, n_steps]);
             self.postMessage([pos, regs, true, n_steps]);
+            clearInterval(eval_loop);
 	        self.close();
         };
 //	    self.postMessage([pos, regs, false]);
