@@ -165,9 +165,7 @@ var remove_last_register = function() {
     var m = $('.register').length;
 
     if (m > 1) {
-//	    var sel = '#'.concat('form_group_register_'.concat(m.toString()));
         var e = $('#form_group_register_'.concat(m.toString()));
-//	    $(sel).remove();
         e.remove();
 	    update_register_buttons(m);
     };
@@ -336,29 +334,6 @@ var button_paused = function() {
     $('#program').prop('readonly', true);
 }
 
-/*
-var eval_button_ready = function() {
-
-    $('#interrupt').prop('disabled', true);
-    $('#interrupt').off('click');
-    $('#evaluate').prop('disabled', false);
-    $('#pause').prop('disabled', true);
-    $('#eval_slow').prop('disabled', false);
-    $('#eval_step').prop('disabled', false);
-    $('#back').prop('disabled', true);
-    $('#reset_machine').prop('disabled', false);
-};
-
-var eval_button_busy = function() {
-
-    $('#interrupt').prop('disabled', false);
-    $('#evaluate').prop('disabled', true);
-    $('#eval_slow').prop('disabled', true);
-    $('#eval_step').prop('disabled', true);
-    $('#reset_machine').prop('disabled', true);
-};
-*/
-
 var reset_machine = function() {
     pos = 0;
     halted = false;
@@ -367,27 +342,8 @@ var reset_machine = function() {
     array_to_dom_regs(saved_regs);
 
     button_ready();
-//    eval_button_ready();
-//    textarea_ready();
-//    $('#eval_step').prop('disabled', false);
     ready_message();
-//    status_text("a 1# interpreter for web browsers (type '?' for help)");
-//    message_text("ready");
 }
-
-/*
-var textarea_ready = function() {
-
-    $('#clear_program').prop('disabled', false);
-    $('#program').prop('readonly', false);
-};
-
-var textarea_busy = function() {
-
-    $('#clear_program').prop('disabled', true);
-    $('#program').prop('readonly', true);
-}
-*/
 
 var evaluate = function() {
 
@@ -407,8 +363,6 @@ var evaluate = function() {
     if (p.length == 0) return;
 
     button_busy();
-//    eval_button_busy();
-//    textarea_busy();
     eval_message();
     
     // Move dom registers to array
@@ -422,7 +376,6 @@ var evaluate = function() {
     	thread.terminate();
         interrupt_message();
         halted = true;
-//    	eval_button_ready();
         $('#interrupt').prop('disabled', true);
         $('#interrupt').off('click');
         $('#reset_machine').prop('disabled', false);
@@ -446,10 +399,6 @@ var evaluate = function() {
 //        halted = true;
         halted = false;
         button_ready();
-//        eval_button_ready();
-//        textarea_ready();
-//        $('#interrupt').prop('disabled', true);
-//        $('#reset_machine').prop('disabled', false);
     };
 
     thread.postMessage([p, regs]);
@@ -472,9 +421,6 @@ var eval_slow = function() {
     if (p.length == 0) return;
 
     button_running();
-//    eval_button_busy();
-//    textarea_busy();
-//    $('#pause').prop('disabled', false);
     eval_message();
     
     if (n_steps == 0) running_message(pos, p, n_steps);
@@ -493,11 +439,6 @@ var eval_slow = function() {
     	thread.terminate();
         pause_message();
         button_paused();
-//    	eval_button_ready();
-//        $('#pause').prop('disabled', true);
-//        $('#eval_slow').prop('disabled', false);
-//        $('#eval_step').prop('disabled', false);
-//        $('#reset_machine').prop('disabled', false);
     });
     thread.onmessage = function(e) {
 
@@ -508,10 +449,6 @@ var eval_slow = function() {
             halted = true;
             button_paused();
             halting_message_steps(pos, p, n_steps);
-//    	    eval_button_ready();
-//            $('#pause').prop('disabled', true);
-//            $('#reset_machine').prop('disabled', false);
-//            if (n_steps > 0) $('#back').prop('disabled', false);
     	} else {
 //            array_to_dom_regs(e.data[1]);
             running_message(pos, p, n_steps);
@@ -536,10 +473,6 @@ var eval_step = function() {
     if (p.length == 0) return;
 
     button_busy(); // not necessary?
-//    eval_button_busy();
-//    textarea_busy();
-//    $('#interrupt').prop('disabled', true);
-//    $('#pause').prop('disabled', true);
     eval_message(); // not necessary?
     
     // Move dom registers to array
@@ -554,10 +487,8 @@ var eval_step = function() {
     if (n_steps > 0) $('#back').prop('disabled', false);
     if (pos < 0 || p.length <= pos) {
         halting_message_steps(pos, p, n_steps);
-//        $('#eval_step').prop('disabled', true);
 	    halted = true;
     } else {
-//	    status_text('executed '.concat(String(n_steps),' steps'));
         running_message(pos, p, n_steps);
         pause_message();
     };
@@ -565,16 +496,6 @@ var eval_step = function() {
     array_to_dom_regs(regs);
 
     button_paused();
-/*
-    if (!halted) {
-//      eval_button_ready();
-        $('#interrupt').prop('disabled', true);
-        $('#eval_step').prop('disabled', false);
-        $('#eval_slow').prop('disabled', false);
-        pause_message();
-    };
-    $('#reset_machine').prop('disabled', false);
-*/
 };
 
 var back = function() {
@@ -590,10 +511,6 @@ var back = function() {
     if (p.length == 0 || n_steps == 0) return;
 
     button_busy();
-//    message_text("running...");
-//    eval_button_busy();
-//    textarea_busy();
-//    $('#interrupt').prop('disabled', false);
     eval_message();
 
     // Start worker and make kill button active
@@ -602,7 +519,6 @@ var back = function() {
         thread.terminate();
         interrupt_message();
         halted = true;
-    //  eval_button_ready();
         $('#interrupt').prop('disabled', true);
         $('#interrupt').off('click');
         $('#reset_machine').prop('disabled', false);
@@ -627,7 +543,6 @@ var back = function() {
         if (e.data[2]) {
             halting_message_steps(pos, p, n_steps);
             halted = true;
-            //  eval_button_ready();
         } else {
             running_message(pos, p, n_steps);
             halted = false;
@@ -782,8 +697,6 @@ $(document).ready(function() {
     extend_registers(1);
 
     button_ready();
-//    eval_button_ready();
-//    textarea_ready();
 
     // click handlers
     $('#remove_register').click(remove_last_register);
