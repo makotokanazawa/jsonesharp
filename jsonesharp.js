@@ -42,9 +42,9 @@ var halting_message_steps = function(n, p, m) {
     }
     else {
 //        status_text("halted improperly");
-        status_text("stopped");
+        status_text("stopped improperly");
 //        message_text("halted improperly after ".concat(String(m)," steps"));
-        message_text("stopped after ".concat(String(m)," steps"));
+        message_text("stopped improperly after ".concat(String(m)," steps"));
     };
 };
 
