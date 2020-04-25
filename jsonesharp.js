@@ -21,26 +21,30 @@ var ready_message = function() {
 var halting_message = function(n, p) {
 
     if (n == p.length) {
-	   status_text("halted properly");
-       message_text("ready");
+//	   status_text("halted properly");
+        status_text("halted");
+        message_text("ready");
     }
     else {
-	   status_text("halted improperly");
-       message_text("ready");
+//	   status_text("halted improperly");
+        status_text("stopped improperly");
+        message_text("ready");
     };
 };
 
 var halting_message_steps = function(n, p, m) {
 
     if (n == p.length) {
-//	status_text("halted properly after ".concat(String(m)," steps"));
-        status_text("halted properly");
-        message_text("halted properly after ".concat(String(m)," steps"));
+//        status_text("halted properly");
+        status_text("halted");
+//        message_text("halted properly after ".concat(String(m)," steps"));
+        message_text("halted after ".concat(String(m)," steps"));
     }
     else {
-//	status_text("halted improperly after ".concat(String(m)," steps"));
-        status_text("halted properly");
-        message_text("halted improperly after ".concat(String(m)," steps"));
+//        status_text("halted improperly");
+        status_text("stopped");
+//        message_text("halted improperly after ".concat(String(m)," steps"));
+        message_text("stopped after ".concat(String(m)," steps"));
     };
 };
 
