@@ -393,7 +393,8 @@ var evaluate = function() {
         $('#interrupt').off('click'); // not necessary?
         $('#reset_machine').prop('disabled', false);
     }, 
-    2000);
+    // 2000);
+    30000);
     
     thread.onmessage = function(e) {
 
