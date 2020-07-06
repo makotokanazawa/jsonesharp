@@ -152,7 +152,8 @@ var vernacular_compile = function(vernacular_text) {
             // then we run the program on its arguments
             program = vernacular_parse(arguments[0]);
             arguments[0] = "";
-            var result = onesharp(program, arguments);
+//            var result = onesharp(program, arguments);
+            var result = onesharp(program, arguments)[0]; // never used
             var insert = vernacular_parse(arguments[1].join(''));
             var new_parsed = parsed.slice(0, i).concat(insert).concat(parsed.slice(i+1));
             parsed = new_parsed;
