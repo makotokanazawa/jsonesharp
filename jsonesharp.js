@@ -399,7 +399,8 @@ var evaluate = function() {
     thread.onmessage = function(e) {
 
         clearTimeout(timeoutID);
-    	halting_message(e.data[0], p);
+//    	halting_message(e.data[0], p);
+    	halting_message_steps(e.data[0], p, e.data[2]);
         array_to_dom_regs(e.data[1]);
 //        halted = true;
         halted = false;
