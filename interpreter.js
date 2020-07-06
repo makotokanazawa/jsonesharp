@@ -101,12 +101,15 @@ var onesharp = function(p, regs) {
 
     var pos = -1;
     var new_pos = 0;
+    var t = 0;
 
 //    while (new_pos != pos) {
     while (0 <= new_pos && new_pos < p.length) {
         pos = new_pos;
         new_pos = step(p, pos, regs);
+        t++;
     }
 
-    return new_pos;
+//    return new_pos;
+    return [new_pos, t];
 };
